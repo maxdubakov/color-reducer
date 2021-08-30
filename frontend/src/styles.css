@@ -1,0 +1,31 @@
+/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&family=Work+Sans:wght@300;400&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 300;
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+.mat-accent .mat-slider-track-fill {
+  opacity: 65%;
+  background-color: #23AA8F !important;
+}
+
+.mat-accent .mat-slider-thumb, .mat-accent .mat-slider-thumb-label {
+  background-color: #23AA8F !important;
+}
+
+.mat-slider-horizontal .mat-slider-ticks {
+  height: 1rem;
+}
+
+.mat-slider {
+  width: 200px;
+  margin-left: auto;
+}

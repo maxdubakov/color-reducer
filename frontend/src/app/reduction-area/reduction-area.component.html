@@ -1,0 +1,86 @@
+<div class="grid-container">
+  <!-- 1 -->
+  <div
+    class="item-1"
+    [ngClass]="url===undefined ? 'background-primary-item' : ''" appDrag
+    (fileDropped)="onFileDropped($event)">
+    <input *ngIf="url === undefined" type="file" #fileDropRef id="fileDropRef" (change)="fileBrowseHandler($event)" name="image" />
+    <img *ngIf="url !== undefined" src="{{url}}" alt="Uploaded Image" class="uploaded-image" (click)="onDeletePicture()">
+    <div *ngIf="url === undefined" class="image-display">
+      <div class="dotted-line">
+        <div class="image-content">
+          <img src="../../assets/images/drag-icon.png" alt="Drag and Drop Image">
+          <p><span class="bold">Choose a file </span>or drag and drop here</p>
+        </div>
+      </div>
+    </div>
+    <div class="centered" [ngClass]="url === undefined ? 'btnmgtop' : 'btnmgtop-5'">
+      <button class="btn background-secondary" type="button" [disabled]="uploaded === false" (click)="onConvert()"><span>Convert </span><img
+        src="../../assets/images/arrow.png" alt="Arrow"></button>
+    </div>
+  </div>
+  <!-- 2 -->
+  <div class="item-2">
+    <div class="settings">
+      <div class="setting">
+        <img src="../../assets/images/hand-mode-icon.png" alt="Hand Icon">
+        <h2>Hand Mode</h2>
+        <div class="switch">
+          <input class="apple-switch" type="checkbox" [(ngModel)]="handMode">
+        </div>
+      </div>
+      <div class="bottom-line"></div>
+      <div class="setting">
+        <img src="../../assets/images/contour-icon.png" alt="Contour Icon">
+        <h2>Contours</h2>
+        <div class="switch">
+          <input class="apple-switch" type="checkbox" [(ngModel)]="contour">
+        </div>
+      </div>
+      <div class="bottom-line" [ngClass]="handMode? 'mgb-70' : ''"></div>
+      <div *ngIf="!handMode" class="setting">
+        <img src="../../assets/images/color-icon.png" alt="Color Icon">
+        <h2>Colors</h2>
+        <div class="slider-holder">
+          <mat-slider
+            max="128"
+            min="0"
+            [(ngModel)]="amountOfColors"
+            (input)="onSliderChange($event)">
+          </mat-slider>
+        </div>
+      </div>
+      <input *ngIf="!handMode" type="number" class="color-input" [(ngModel)]="amountOfColors" #colorInp>
+      <div *ngIf="handMode" class="color-picker-container mg33px">
+        <color-chrome [color]="currentColor" (onChangeComplete)="changeComplete($event)" class="color-picker" #chromeComponent></color-chrome>
+        <div class="saved-colors">
+          <div *ngFor="let color of selectedColors">
+            <div style="background-color:{{color}}" class="saved-color" (click)="onDeleteColor(color)"></div>
+          </div>
+        </div>
+        <div class="save-button">
+          <button class="btn small-btn" (click)="onSaveColor()">Add Color</button>
+        </div>
+      </div>
+      <div class="loading-gif">
+        <img *ngIf="converting" class="converting" src="assets/loading.gif" alt="Loading">
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="item-3" [ngClass]="convertedUrl===undefined ? 'background-primary-item' : ''">
+    <img *ngIf="convertedUrl !== undefined" [src]="convertedUrl" alt="Uploaded Image" class="uploaded-image">
+    <div *ngIf="convertedUrl === undefined" class="image-display">
+      <div class="dotted-line">
+        <div class="image-content large-image">
+          <img src="../../assets/images/picture-icon.png" alt="Drag and Drop Image">
+          <p>Your converted image will show up here</p>
+        </div>
+      </div>
+    </div>
+    <div class="centered" [ngClass]="convertedUrl === undefined ? 'btnmgtop' : 'btnmgtop-5'">
+      <button class="btn background-primary" [disabled]="convertedUrl === undefined" (click)="onDownload()">Download</button>
+    </div>
+  </div>
+</div>

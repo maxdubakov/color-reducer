@@ -1,0 +1,37 @@
+.navbar-main {
+  position: relative;
+  font-family: 'Roboto', sans-serif;
+  background-color: #EAFFF6;
+  height: 110px;
+  border-bottom: 2px solid #5BC489;
+}
+
+.nav-container {
+  display: flex;
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  flex-direction: row;
+  align-items: center;
+  padding-left: 70px;
+}
+
+img {
+  height: 70px;
+  width: 70px;
+}
+
+h1 {
+  font-size: 60px;
+  padding-left: 1rem;
+  margin-bottom: 0;
+}
+
+.main-dark-color {
+  color: #23AA8F;
+}
+
+.main-light-color {
+  color: #5BC489;
+}
