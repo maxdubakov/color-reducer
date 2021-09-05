@@ -15,13 +15,16 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
   @ViewChild("fileDropRef", {static: false}) fileDropEl: ElementRef | undefined;
   @ViewChild('chromeComponent') chromeComponent: any;
   @ViewChild('colorInp') colorInp: ElementRef | undefined;
+  @ViewChild('rubiksCube') rubiksCubeElem: ElementRef | undefined;
 
   server = 'http://localhost:8000';
 
   currentColor: string = '#ffffff';
   handMode: boolean | undefined;
   contour: boolean | undefined;
+  rubiksCube: boolean | undefined;
   amountOfColors: number | undefined;
+  size: number | undefined;
   uploaded: boolean | undefined;
   converting: boolean | undefined;
   url: any;
@@ -40,7 +43,9 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
     this.currentColor = '#fff';
     this.handMode = false;
     this.contour = false;
+    this.rubiksCube = false;
     this.amountOfColors = 32;
+    this.size = 5;
     this.uploaded = false;
     this.converting = false;
     this.url = undefined;
@@ -93,6 +98,12 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
     // @ts-ignore
     params = params.append('n', this.amountOfColors.toString());
     // @ts-ignore
+    params = params.append('contour', this.contour.toString())
+    console.log(this.contour)
+    // @ts-ignore
+    params = params.append('rubik', this.rubiksCube.toString())
+    // @ts-ignore
+    params = params.append('size', this.size.toString())
     if (this.handMode) {
       for (let color of this.selectedColors) {
         params = params.append('centers', color);
@@ -153,5 +164,10 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
   onSliderChange($event: any) {
     // @ts-ignore
     this.colorInp?.nativeElement.value = $event.value;
+  }
+
+  onCubicSizeChange($event: any) {
+    // @ts-ignore
+    this.rubiksCubeElem?.nativeElement.value = $event.value;
   }
 }

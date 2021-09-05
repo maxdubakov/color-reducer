@@ -19,6 +19,10 @@ def get_centers(request):
     return centers
 
 
+def get_bool(value):
+    return False if value == 'false' else True
+
+
 def store_file(file, _format):
     with open(f'temp/image.{_format}', 'wb+') as dest:
         for chunk in file.chunks():
@@ -42,12 +46,16 @@ def upload(request):
 
 def reduce(request):
     n = int(request.GET.get('n'))
+    rubik = get_bool(request.GET.get('rubik'))
+    size = int(request.GET.get('size'))
+    contour = get_bool(request.GET.get('contour'))
+    print(contour)
     centers = get_centers(request)
 
     with open('temp/.meta', 'r') as meta:
         _format = str(meta.read()).replace('\n', '')
 
-    reduction_func(n, f'temp/image.{_format}', centers)
+    reduction_func(n, f'temp/image.{_format}', centers, rubik, size, contour)
 
     with open(f'temp/converted.png', 'rb') as root:
         file_data = root.read()
