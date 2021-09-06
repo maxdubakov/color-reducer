@@ -25,12 +25,15 @@ SECRET_KEY = 'django-insecure-sfc#@($x7ff64lqmd#&nazj&=83*x$iz4kpa#^qnz8i6#38krd
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+
+]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'image',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

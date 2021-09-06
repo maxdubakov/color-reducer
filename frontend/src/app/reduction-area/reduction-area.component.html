@@ -48,37 +48,33 @@
         <img *ngIf="!contour" src="../../assets/images/pixel_art_no_contours.png" alt="Hand Icon">
         <h2>Pixel Art</h2>
         <div class="switch">
-          <input class="apple-switch" type="checkbox" [(ngModel)]="rubiksCube">
+          <input class="apple-switch" type="checkbox" [(ngModel)]="pixelArt">
         </div>
       </div>
-      <div *ngIf="rubiksCube" class="bottom-line"></div>
-      <div *ngIf="rubiksCube" class="setting">
-        <img src="../../assets/images/color-icon.png" alt="Color Icon">
-        <h2>Cube Size</h2>
-        <div class="slider-holder">
-          <mat-slider
-            max="100"
-            min="1"
-            [(ngModel)]="size"
-            (input)="onCubicSizeChange($event)">
-          </mat-slider>
+      <div *ngIf="!pixelArt" class="bottom-line"></div>
+      <div *ngIf="!pixelArt" class="setting">
+        <img src="../../assets/images/smoothing-icon.png" alt="Contour Icon">
+        <h2>Smoothing</h2>
+        <div class="switch">
+          <input type="number" class="color-input" [(ngModel)]="maximumArea" #SmoothingInp (ngModelChange)="checkMaximumArea()">
         </div>
       </div>
-      <input *ngIf="rubiksCube" type="number" class="color-input" [(ngModel)]="size" #rubiksCube>
+      <div *ngIf="pixelArt" class="bottom-line"></div>
+      <div *ngIf="pixelArt" class="setting">
+        <img src="../../assets/images/pixel-size-icon.png" alt="Color Icon">
+        <h2>Pixel Size</h2>
+        <div class="input-holder">
+          <input type="number" class="color-input" [(ngModel)]="size" #rubiksCube>
+        </div>
+      </div>
       <div class="bottom-line" [ngClass]="handMode? 'mgb-70' : ''"></div>
       <div *ngIf="!handMode" class="setting">
         <img src="../../assets/images/color-icon.png" alt="Color Icon">
-        <h2>Colors</h2>
-        <div class="slider-holder">
-          <mat-slider
-            max="128"
-            min="1"
-            [(ngModel)]="amountOfColors"
-            (input)="onSliderChange($event)">
-          </mat-slider>
+        <h2>Colours</h2>
+        <div class="input-holder">
+          <input *ngIf="!handMode" type="number" class="color-input" [(ngModel)]="amountOfColors" #colorInp>
         </div>
       </div>
-      <input *ngIf="!handMode" type="number" class="color-input" [(ngModel)]="amountOfColors" #colorInp>
       <div *ngIf="handMode" class="color-picker-container mg33px">
         <color-chrome [color]="currentColor" (onChangeComplete)="changeComplete($event)" class="color-picker"
                       #chromeComponent></color-chrome>

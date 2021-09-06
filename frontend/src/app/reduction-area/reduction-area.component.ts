@@ -1,9 +1,8 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ColorEvent} from "ngx-color";
-import {HttpClient, HttpParams} from "@angular/common/http";
+import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
 import {DomSanitizer} from "@angular/platform-browser";
-
-// import * as fileSaver from 'file-saver';
+import {GetCookieService} from "../get-cookie.service";
 
 @Component({
   selector: 'app-reduction-area',
@@ -19,10 +18,14 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
 
   server = 'http://localhost:8000';
 
+  static MAXIMUM_AREA = 100;
+
   currentColor: string = '#ffffff';
   handMode: boolean | undefined;
   contour: boolean | undefined;
-  rubiksCube: boolean | undefined;
+  smoothing: boolean | undefined;
+  maximumArea: number | undefined;
+  pixelArt: boolean | undefined;
   amountOfColors: number | undefined;
   size: number | undefined;
   uploaded: boolean | undefined;
@@ -35,15 +38,22 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
   file: any;
   file_uploading_sub: any;
 
+  csrf_token: string | undefined | null;
+  hash_name: string | undefined;
 
-  constructor(private http: HttpClient, private dom: DomSanitizer) {
+
+  constructor(private http: HttpClient,
+              private dom: DomSanitizer,
+              private getCookie: GetCookieService) {
   }
 
   setDefault() {
     this.currentColor = '#fff';
     this.handMode = false;
     this.contour = false;
-    this.rubiksCube = false;
+    this.smoothing = false;
+    this.maximumArea = 0;
+    this.pixelArt = false;
     this.amountOfColors = 32;
     this.size = 5;
     this.uploaded = false;
@@ -54,6 +64,13 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
     this.selectedColors = [];
     this.file = undefined;
     this.file_uploading_sub = undefined;
+    this.hash_name = undefined;
+
+    this.http
+      .get(`${this.server}/image/csrf`)
+      .subscribe(res => {
+        this.csrf_token = this.getCookie.getCookie('csrftoken');
+      });
   }
 
   ngOnInit(): void {
@@ -98,12 +115,15 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
     // @ts-ignore
     params = params.append('n', this.amountOfColors.toString());
     // @ts-ignore
-    params = params.append('contour', this.contour.toString())
-    console.log(this.contour)
+    params = params.append('contour', this.contour.toString());
     // @ts-ignore
-    params = params.append('rubik', this.rubiksCube.toString())
+    params = params.append('rubik', this.pixelArt.toString());
     // @ts-ignore
-    params = params.append('size', this.size.toString())
+    params = params.append('size', this.size.toString());
+    // @ts-ignore
+    params = params.append('smoothing', this.maximumArea.toString());
+    // @ts-ignore
+    params = params.append('image', this.hash_name.toString());
     if (this.handMode) {
       for (let color of this.selectedColors) {
         params = params.append('centers', color);
@@ -136,13 +156,17 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
   uploadFile() {
     if (this.file) {
       const formData = new FormData();
-      formData.append(this.fileDropEl?.nativeElement.name, this.file);
-      const upload = this.http.post(`${this.server}/image/upload`, formData,
+      formData.append('image', this.file);
+      let headers = new HttpHeaders();
+      // @ts-ignore
+      headers = headers.append('X-CSRFToken', this.csrf_token);
+      const upload = this.http.post<{hash_name: string}>(`${this.server}/image/upload`, formData,
         {
-          withCredentials: false
+          headers: headers
         });
-      this.file_uploading_sub = upload.subscribe(() => {
+      this.file_uploading_sub = upload.subscribe(res => {
         this.uploaded = true;
+        this.hash_name = res.hash_name;
       });
     }
   }
@@ -161,13 +185,9 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSliderChange($event: any) {
-    // @ts-ignore
-    this.colorInp?.nativeElement.value = $event.value;
-  }
-
-  onCubicSizeChange($event: any) {
-    // @ts-ignore
-    this.rubiksCubeElem?.nativeElement.value = $event.value;
+  checkMaximumArea() {
+    if (this.maximumArea !== undefined && this.maximumArea > ReductionAreaComponent.MAXIMUM_AREA) {
+      this.maximumArea = ReductionAreaComponent.MAXIMUM_AREA;
+    }
   }
 }

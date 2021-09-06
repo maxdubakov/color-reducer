@@ -36,4 +36,5 @@ import {MatSliderModule} from "@angular/material/slider";
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

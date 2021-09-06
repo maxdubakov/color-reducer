@@ -1,7 +1,10 @@
 from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
 
 from reducer.util import reduce as reduction_func, hex_to_rgb
+from reducer.util import get_hash, remove_file
+
 
 # Create your views here.
 
@@ -24,23 +27,27 @@ def get_bool(value):
 
 
 def store_file(file, _format):
-    with open(f'temp/image.{_format}', 'wb+') as dest:
+    hash_name = get_hash()
+    with open(f'images/{hash_name}.{_format}', 'wb+') as dest:
         for chunk in file.chunks():
             dest.write(chunk)
 
-    with open(f'temp/.meta', 'w+') as meta:
+    with open(f'images/{hash_name}_copy.{_format}', 'wb+') as dest:
+        for chunk in file.chunks():
+            dest.write(chunk)
+
+    with open(f'images/.{hash_name}', 'w+') as meta:
         meta.write(_format)
 
+    return hash_name
 
-@csrf_exempt
+
 def upload(request):
     file = request.FILES['image']
 
-
     _format = str(file).split('.')[-1]
-    store_file(file, _format)
-    resp = HttpResponse()
-    resp['Access-Control-Allow-Origin'] = '*'
+    hash_name = store_file(file, _format)
+    resp = JsonResponse({'hash_name': hash_name})
     return resp
 
 
@@ -49,18 +56,31 @@ def reduce(request):
     rubik = get_bool(request.GET.get('rubik'))
     size = int(request.GET.get('size'))
     contour = get_bool(request.GET.get('contour'))
-    print(contour)
+    smoothing = int(request.GET.get('smoothing'))
+    hash_name = str(request.GET.get('image'))
     centers = get_centers(request)
 
-    with open('temp/.meta', 'r') as meta:
+    meta_path = f'images/.{hash_name}'
+
+    with open(meta_path, 'r') as meta:
         _format = str(meta.read()).replace('\n', '')
 
-    reduction_func(n, f'temp/image.{_format}', centers, rubik, size, contour)
+    file_path = f'images/{hash_name}_copy.{_format}'
+    save_path = f'images/{hash_name}_converted.png'
 
-    with open(f'temp/converted.png', 'rb') as root:
+    reduction_func(n, file_path, centers, rubik, size, contour, smoothing, save_path)
+
+    with open(save_path, 'rb') as root:
         file_data = root.read()
 
+    # remove_file(meta_path)
+    # remove_file(file_path)
+    # remove_file(save_path)
+
     response = HttpResponse(file_data, content_type='application/image/png')
-    response['Access-Control-Allow-Origin'] = '*'
     response['Content-Disposition'] = 'attachment; filename="converted.png"'
     return response
+
+
+def csrf(request):
+    return JsonResponse({})

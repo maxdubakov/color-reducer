@@ -288,15 +288,15 @@ input.apple-switch:checked:after {
 }
 
 .color-input {
-  width: 62px;
-  height: 22px;
+  width: 105px;
+  height: 45px;
   background: #FFFFFF;
   border: 1px solid #BDE7D0;
   box-shadow: inset 0px 0px 9px -3px rgba(0, 0, 0, 0.25);
-  border-radius: 2px;
+  border-radius: 10px;
   text-align: center;
   margin-left: auto;
-  margin-right: 0.5rem;
+  font-size: 1.3rem;
 }
 
 .color-input:focus {
@@ -309,7 +309,7 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-.slider-holder {
+.input-holder {
   display: flex;
   flex-direction: column;
   margin-left: auto;

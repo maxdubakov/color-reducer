@@ -1,6 +1,12 @@
+import operator
+from collections import Counter
+import secrets
+import os
+
 import PIL.Image
 import PIL.ImageOps
 import numpy as np
+from scipy.spatial import distance
 from sklearn.utils import shuffle
 from sklearn.cluster import KMeans
 
@@ -38,6 +44,18 @@ def load_image(path):
             row.append(list(_image.getpixel((i, j))))
         pixels.append(row)
     return np.array(pixels)
+
+
+def load_image_with_marks(path):
+    _image = PIL.Image.open(path).convert('RGB')
+    size = _image.size
+    pixels = []
+    for i in range(size[0]):
+        col = []
+        for j in range(size[1]):
+            col.append([list(_image.getpixel((i, j))), False])
+        pixels.append(col)
+    return pixels, size[0], size[1]
 
 
 def add_colors(c1, c2):
@@ -83,7 +101,62 @@ def get_labels(n, image, centers):
     return kmeans.cluster_centers_, labels, w, h
 
 
-def recreate_image(_codebook, _labels, _w, _h, size, contour, name):
+def smooth_contours(path, threshold):
+    _image, w, h = load_image_with_marks(path)
+    pixel = 0
+    visited = 1
+    neighbours = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+    for i, col in enumerate(_image):
+        for j, value in enumerate(col):
+            if not value[visited]:
+                queue = [((i, j), value)]  # ((row, column), ((r, g, b), visited))
+                target = [((i, j), value)]
+                border = []
+
+                while len(queue) != 0:
+                    current = queue.pop(0)  # ((row, column), ((r, g, b), visited))
+                    current[1][visited] = True
+
+                    for neighbour in neighbours:
+                        coord = tuple(map(operator.add, neighbour, current[0]))
+                        if (-1 < coord[0] < w) and (-1 < coord[1] < h):
+                            image_neighbour = _image[coord[0]][coord[1]]
+                            if (not image_neighbour[visited]) and (image_neighbour[pixel] == current[1][pixel]):
+                                if (coord, image_neighbour) not in target:
+                                    queue.append((coord, image_neighbour))
+                                    target.append((coord, image_neighbour))
+                            if (image_neighbour[pixel] not in border) and (image_neighbour[pixel] != current[1][pixel]):
+                                border.append(tuple(image_neighbour[pixel]))
+
+                if len(target) < threshold and len(border) > 0:
+                    c = Counter(border)
+                    common = c.most_common(1)[0]
+                    for p in target:
+                        _image[p[0][0]][p[0][1]] = common
+    for i, col in enumerate(_image):
+        for j, value in enumerate(col):
+            if len(_image[i][j]) == 2:
+                _image[i][j] = _image[i][j][0]
+    return _image
+
+
+def draw_contours(_image: PIL.Image):
+    border_color = (180, 180, 180)
+    # default_color = (255, 255, 255)
+    dist_threshold = 20
+    width, height = _image.size
+    for x in range(width - 2):
+        for y in range(height - 2):
+            if _image.getpixel((x, y)) != border_color:
+                if (distance.euclidean(_image.getpixel((x, y)), _image.getpixel((x + 1, y))) >= dist_threshold) or \
+                        (distance.euclidean(_image.getpixel((x, y)), _image.getpixel((x, y + 1))) >= dist_threshold):
+                    _image.putpixel((x, y), border_color)
+                # else:
+                #     _image.putpixel((x, y), default_color)
+    return _image
+
+
+def recreate_image(_codebook, _labels, _w, _h, size, contour, smoothing, save_path):
     _d = _codebook.shape[1]
     _image = np.zeros((_w, _h, _d), dtype=np.uint8)
     label_idx = 0
@@ -96,14 +169,24 @@ def recreate_image(_codebook, _labels, _w, _h, size, contour, name):
             label_idx += 1
 
     new_image = PIL.ImageOps.mirror(PIL.Image.fromarray(_image).rotate(-90, expand=True))
-    new_image.save(f'/Users/max/Documents/Programming/web_development/Projects/ColorReducer/backend/temp/{name}.png')
+    new_image.save(save_path)
+
+    if smoothing != 0 and size == -1:
+        new_image = smooth_contours(save_path, smoothing)
+        new_image = np.array(new_image, dtype=np.uint8)
+        new_image = PIL.ImageOps.mirror(PIL.Image.fromarray(new_image).rotate(-90, expand=True))
+
+        if contour:
+            new_image = draw_contours(new_image)
+    new_image.save(save_path)
 
 
 def fit(shape, size):
     return shape[0] % size == 0 and shape[1] % size == 0
 
 
-def reduce(n, path, centers=None, rubik=False, size=-1, contour=True, name='converted'):
+def reduce(n, path, centers=None, rubik=False, size=-1, contour=True, smoothing=0, save_path=None):
+
     if rubik:
         crop_image(path, size)
 
@@ -123,4 +206,14 @@ def reduce(n, path, centers=None, rubik=False, size=-1, contour=True, name='conv
         centers = np.array(centers, dtype=np.float)
 
     centers, labels, w, h = get_labels(n, image, centers)
-    recreate_image(centers, labels, w, h, size, contour, name)
+    recreate_image(centers, labels, w, h, size, contour, smoothing, save_path)
+
+
+
+def get_hash():
+    return secrets.token_hex(nbytes=16)
+
+
+def remove_file(path):
+    if os.path.exists(path):
+        os.remove(path)
