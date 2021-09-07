@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
 from reducer.util import reduce as reduction_func, hex_to_rgb
 from reducer.util import get_hash, remove_file
@@ -28,20 +28,20 @@ def get_bool(value):
 
 def store_file(file, _format):
     hash_name = get_hash()
-    with open(f'images/{hash_name}.{_format}', 'wb+') as dest:
+    with open(f'uploads/images/{hash_name}.{_format}', 'wb+') as dest:
         for chunk in file.chunks():
             dest.write(chunk)
 
-    with open(f'images/{hash_name}_copy.{_format}', 'wb+') as dest:
+    with open(f'uploads/images/{hash_name}_copy.{_format}', 'wb+') as dest:
         for chunk in file.chunks():
             dest.write(chunk)
 
-    with open(f'images/.{hash_name}', 'w+') as meta:
+    with open(f'uploads/images/.{hash_name}', 'w+') as meta:
         meta.write(_format)
 
     return hash_name
 
-
+@csrf_exempt
 def upload(request):
     file = request.FILES['image']
 
@@ -60,13 +60,13 @@ def reduce(request):
     hash_name = str(request.GET.get('image'))
     centers = get_centers(request)
 
-    meta_path = f'images/.{hash_name}'
+    meta_path = f'uploads/images/.{hash_name}'
 
     with open(meta_path, 'r') as meta:
         _format = str(meta.read()).replace('\n', '')
 
-    file_path = f'images/{hash_name}_copy.{_format}'
-    save_path = f'images/{hash_name}_converted.png'
+    file_path = f'uploads/images/{hash_name}_copy.{_format}'
+    save_path = f'uploads/images/{hash_name}_converted.png'
 
     reduction_func(n, file_path, centers, rubik, size, contour, smoothing, save_path)
 

@@ -16,7 +16,7 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
   @ViewChild('colorInp') colorInp: ElementRef | undefined;
   @ViewChild('rubiksCube') rubiksCubeElem: ElementRef | undefined;
 
-  server = 'http://localhost:8000';
+  server = 'http://colorreducer-env.eba-yhzwbhbv.us-east-2.elasticbeanstalk.com';
 
   static MAXIMUM_AREA = 100;
 
@@ -157,13 +157,14 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
     if (this.file) {
       const formData = new FormData();
       formData.append('image', this.file);
-      let headers = new HttpHeaders();
+      // let headers = new HttpHeaders();
       // @ts-ignore
-      headers = headers.append('X-CSRFToken', this.csrf_token);
-      const upload = this.http.post<{hash_name: string}>(`${this.server}/image/upload`, formData,
-        {
-          headers: headers
-        });
+      // headers = headers.append('X-CSRFToken', this.csrf_token);
+      const upload = this.http.post<{hash_name: string}>(`${this.server}/image/upload`, formData
+        // {
+        //   headers: headers
+        // }
+        );
       this.file_uploading_sub = upload.subscribe(res => {
         this.uploaded = true;
         this.hash_name = res.hash_name;
