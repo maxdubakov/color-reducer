@@ -1,3 +1,9 @@
+<app-error
+  *ngIf="error"
+  (closed)="onErrorClosed()"
+  [title]="error_title"
+  [firstMessage]="error_first_msg"
+  [secondMessage]="error_second_msg"></app-error>
 <div class="grid-container">
   <!-- 1 -->
   <div
@@ -56,7 +62,8 @@
         <img src="../../assets/images/smoothing-icon.png" alt="Contour Icon">
         <h2>Smoothing</h2>
         <div class="switch">
-          <input type="number" class="color-input" [(ngModel)]="maximumArea" #SmoothingInp (ngModelChange)="checkMaximumArea()">
+          <input type="number" class="color-input" [(ngModel)]="maximumArea" min="0" max="100"
+                 (change)="checkSmoothing(0, 100)">
         </div>
       </div>
       <div *ngIf="pixelArt" class="bottom-line"></div>
@@ -64,7 +71,8 @@
         <img src="../../assets/images/pixel-size-icon.png" alt="Color Icon">
         <h2>Pixel Size</h2>
         <div class="input-holder">
-          <input type="number" class="color-input" [(ngModel)]="size" #rubiksCube>
+          <input type="number" class="color-input" [(ngModel)]="size" min="1" max="100"
+                 (change)="checkPixelSize(1, 100)" #rubiksCube>
         </div>
       </div>
       <div class="bottom-line" [ngClass]="handMode? 'mgb-70' : ''"></div>
@@ -72,7 +80,8 @@
         <img src="../../assets/images/color-icon.png" alt="Color Icon">
         <h2>Colours</h2>
         <div class="input-holder">
-          <input *ngIf="!handMode" type="number" class="color-input" [(ngModel)]="amountOfColors" #colorInp>
+          <input *ngIf="!handMode" type="number" class="color-input" [(ngModel)]="amountOfColors" min="2" max="128"
+                 (change)="checkColors(2, 128)" #colorInp>
         </div>
       </div>
       <div *ngIf="handMode" class="color-picker-container mg33px">

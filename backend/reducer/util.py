@@ -217,3 +217,19 @@ def get_hash():
 def remove_file(path):
     if os.path.exists(path):
         os.remove(path)
+
+
+def wrong_parameters(n, size, smoothing, hash_name):
+    if n < 2 or n > 128:
+        return True
+
+    if size < 1 or size > 100:
+        return True
+
+    if smoothing < 0 or smoothing > 100:
+        return True
+
+    if hash_name == '' or hash_name is None:
+        return True
+
+    return False

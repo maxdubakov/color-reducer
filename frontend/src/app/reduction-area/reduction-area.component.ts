@@ -3,6 +3,8 @@ import {ColorEvent} from "ngx-color";
 import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
 import {DomSanitizer} from "@angular/platform-browser";
 import {GetCookieService} from "../get-cookie.service";
+import {ErrorComponent} from "../error/error.component";
+import {first} from "rxjs/operators";
 
 @Component({
   selector: 'app-reduction-area',
@@ -37,14 +39,15 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
   selectedColors: string[] = [];
   file: any;
   file_uploading_sub: any;
-
-  csrf_token: string | undefined | null;
   hash_name: string | undefined;
 
+  error = false;
+  error_title: string = '';
+  error_first_msg: string = '';
+  error_second_msg: string = '';
 
   constructor(private http: HttpClient,
-              private dom: DomSanitizer,
-              private getCookie: GetCookieService) {
+              private dom: DomSanitizer) {
   }
 
   setDefault() {
@@ -65,12 +68,10 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
     this.file = undefined;
     this.file_uploading_sub = undefined;
     this.hash_name = undefined;
-
-    this.http
-      .get(`${this.server}/image/csrf`)
-      .subscribe(res => {
-        this.csrf_token = this.getCookie.getCookie('csrftoken');
-      });
+    this.error = false;
+    this.error_title = '';
+    this.error_first_msg = '';
+    this.error_second_msg = '';
   }
 
   ngOnInit(): void {
@@ -111,6 +112,11 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
 
   onConvert() {
     this.converting = true;
+
+    if (this.checkAndReplaceIfUndefined()) {
+      return;
+    }
+
     let params = new HttpParams();
     // @ts-ignore
     params = params.append('n', this.amountOfColors.toString());
@@ -129,6 +135,7 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
         params = params.append('centers', color);
       }
     }
+
     this.http.get(`${this.server}/image/reduce`,
       {
         responseType: 'blob',
@@ -139,6 +146,13 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
         this.downloadUrl = window.URL.createObjectURL(res);
         this.convertedUrl = this.dom.bypassSecurityTrustUrl(this.downloadUrl);
         this.converting = false;
+      }, err => {
+        this.raiseError(
+          'Convert Error',
+          'Failed to convert Your image properly',
+          'Please, double check parameters and try again'
+        );
+        this.setDefault();
       });
   }
 
@@ -168,6 +182,11 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
       this.file_uploading_sub = upload.subscribe(res => {
         this.uploaded = true;
         this.hash_name = res.hash_name;
+      }, err => {
+        this.raiseError(
+          'File Upload Error',
+          'Failed to connect to server',
+          'Please, try later')
       });
     }
   }
@@ -175,6 +194,11 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
   showFile() {
     const mimeType = this.file.type;
     if (mimeType.match(/image\/*/) == null) {
+      this.raiseError(
+        'File Type Error',
+        'You are allowed to load images only!',
+        'Try another file'
+      );
       return;
     }
 
@@ -190,5 +214,57 @@ export class ReductionAreaComponent implements OnInit, OnDestroy {
     if (this.maximumArea !== undefined && this.maximumArea > ReductionAreaComponent.MAXIMUM_AREA) {
       this.maximumArea = ReductionAreaComponent.MAXIMUM_AREA;
     }
+  }
+
+  raiseError(title: string, first_msg: string, second_msg: string) {
+    this.error_title = title;
+    this.error_first_msg = first_msg;
+    this.error_second_msg = second_msg;
+    this.error = true;
+  }
+
+  onErrorClosed() {
+    this.error = false;
+    this.error_title = '';
+    this.error_first_msg = '';
+    this.error_second_msg = '';
+  }
+
+  checkSmoothing(lb: number, ub: number) {
+    if (this.maximumArea !== undefined && (this.maximumArea > ub || this.maximumArea < lb)) {
+      this.maximumArea = 0;
+    }
+  }
+
+  checkColors(lb: number, ub: number) {
+    if (this.amountOfColors !== undefined && (this.amountOfColors > ub || this.amountOfColors < lb)) {
+      this.amountOfColors = 32;
+    }
+  }
+
+  checkPixelSize(lb: number, ub: number) {
+    if (this.size !== undefined && (this.size > ub || this.size < lb)) {
+      this.size = 5;
+    }
+  }
+
+  checkAndReplaceIfUndefined() {
+    if (this.amountOfColors === undefined ||
+      this.contour === undefined ||
+      this.pixelArt === undefined ||
+      this.size === undefined ||
+      this.maximumArea === undefined ||
+      this.hash_name === undefined ||
+      this.handMode === undefined ||
+      this.selectedColors === undefined) {
+
+      this.raiseError(
+        'Wrong parameters',
+        'Some of Your parameters are not defined',
+        'Everything will be reset to defaults');
+      this.setDefault();
+      return true;
+    }
+    return false;
   }
 }

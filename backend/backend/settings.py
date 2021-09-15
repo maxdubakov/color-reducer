@@ -30,10 +30,6 @@ ALLOWED_HOSTS = [
     getenv('APP_HOST')
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    'http://color-reducer.s3-website.eu-central-1.amazonaws.com'
-]
-
 CSRF_TRUSTED_ORIGINS = [
     "http://color-reducer.s3-website.eu-central-1.amazonaws.com",
 ]
@@ -48,17 +44,14 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'corsheaders',
     'django.contrib.staticfiles',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    "corsheaders.middleware.CorsPostCsrfMiddleware",
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

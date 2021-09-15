@@ -1,9 +1,10 @@
-from django.http import HttpResponse
+from django.core.exceptions import ValidationError
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_protect, csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 
 from reducer.util import reduce as reduction_func, hex_to_rgb
-from reducer.util import get_hash, remove_file
+from reducer.util import get_hash, wrong_parameters
 
 
 # Create your views here.
@@ -47,40 +48,60 @@ def upload(request):
 
     _format = str(file).split('.')[-1]
     hash_name = store_file(file, _format)
-    resp = JsonResponse({'hash_name': hash_name})
-    return resp
-
-
-def reduce(request):
-    n = int(request.GET.get('n'))
-    rubik = get_bool(request.GET.get('rubik'))
-    size = int(request.GET.get('size'))
-    contour = get_bool(request.GET.get('contour'))
-    smoothing = int(request.GET.get('smoothing'))
-    hash_name = str(request.GET.get('image'))
-    centers = get_centers(request)
-
-    meta_path = f'uploads/images/.{hash_name}'
-
-    with open(meta_path, 'r') as meta:
-        _format = str(meta.read()).replace('\n', '')
-
-    file_path = f'uploads/images/{hash_name}_copy.{_format}'
-    save_path = f'uploads/images/{hash_name}_converted.png'
-
-    reduction_func(n, file_path, centers, rubik, size, contour, smoothing, save_path)
-
-    with open(save_path, 'rb') as root:
-        file_data = root.read()
-
-    # remove_file(meta_path)
-    # remove_file(file_path)
-    # remove_file(save_path)
-
-    response = HttpResponse(file_data, content_type='application/image/png')
-    response['Content-Disposition'] = 'attachment; filename="converted.png"'
+    response = JsonResponse({'hash_name': hash_name})
+    response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
+def reduce(request):
+    try:
+        n = int(request.GET.get('n'))
+        rubik = get_bool(request.GET.get('rubik'))
+        size = int(request.GET.get('size'))
+        contour = get_bool(request.GET.get('contour'))
+        smoothing = int(request.GET.get('smoothing'))
+        hash_name = str(request.GET.get('image'))
+        centers = get_centers(request)
+    except Exception:
+        response = HttpResponseBadRequest('Some parameters are not correct')
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    if wrong_parameters(n, size, smoothing, hash_name):
+        response = HttpResponseBadRequest('Some parameters are not correct')
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    try:
+        meta_path = f'uploads/images/.{hash_name}'
+
+        with open(meta_path, 'r') as meta:
+            _format = str(meta.read()).replace('\n', '')
+
+        file_path = f'uploads/images/{hash_name}_copy.{_format}'
+        save_path = f'uploads/images/{hash_name}_converted.png'
+
+        reduction_func(n, file_path, centers, rubik, size, contour, smoothing, save_path)
+
+        with open(save_path, 'rb') as root:
+            file_data = root.read()
+
+        # remove_file(meta_path)
+        # remove_file(file_path)
+        # remove_file(save_path)
+
+        response = HttpResponse(file_data, content_type='application/image/png')
+        response['Content-Disposition'] = 'attachment; filename="converted.png"'
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+    except:
+        response = HttpResponseBadRequest('Something went wrong')
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+
+
 def csrf(request):
-    return JsonResponse({})
+    response = HttpResponse('{}')
+    response['Access-Control-Allow-Origin'] = '*'
+    return response

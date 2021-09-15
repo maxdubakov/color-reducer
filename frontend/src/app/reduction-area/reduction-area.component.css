@@ -41,14 +41,14 @@ input.apple-switch:checked:after {
 .grid-container {
   display: grid;
   grid-template-columns: 3fr 4fr 3fr;
-  padding-top: 85px;
+  padding-top: 60px;
   font-family: 'Roboto', sans-serif;
   margin-bottom: 0;
 }
 
 .item-1, .item-2, .item-3 {
   position: relative;
-  height: 610px;
+  height: 530px;
   border-radius: 5px;
 }
 
@@ -73,7 +73,7 @@ input.apple-switch:checked:after {
 
 .dotted-line {
   position: relative;
-  height: 590px;
+  height: 510px;
   border: 3px dashed #5BC489;
   box-sizing: border-box;
   border-radius: 14px;
@@ -101,9 +101,9 @@ input.apple-switch:checked:after {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 615px;
-  width: 455px;
+  height: 530px;
   background-color: #EEEEEE;
+  margin-bottom: 2.2rem;
 }
 
 .uploaded-image {
@@ -116,13 +116,13 @@ input.apple-switch:checked:after {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 100px;
+  width: 90px;
   padding: 50px;
 }
 
 .image-display p {
   padding-top: 6%;
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 .bold {
@@ -132,8 +132,8 @@ input.apple-switch:checked:after {
 /* SETTINGS */
 
 .settings {
-  margin: 48px 85px 0;
   display: grid;
+  margin: 43px 65px 0;
 }
 
 .setting {
@@ -150,30 +150,21 @@ input.apple-switch:checked:after {
 
 .bottom-line {
   position: relative;
-  padding-bottom: 18px;
-  margin-bottom: 18px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
   /*border-bottom: 1px solid #E4E4E4;*/
   width: 23%;
   left: 39.5%;
 }
 
-/*.settings > .bottom-line::after {*/
-/*  content: '';*/
-/*  position: absolute;*/
-/*  border-bottom: 1px solid #ccc;*/
-/*  top: 0;*/
-/*  left: 0;*/
-/*  width: calc(100vw - 60px);*/
-/*}*/
-
 .setting img {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
 }
 
 .setting h2 {
   padding-left: 21px;
-  font-size: 25px;
+  font-size: 22px;
   font-weight: 300;
 }
 
@@ -182,20 +173,20 @@ input.apple-switch:checked:after {
 }
 
 .btn {
-  width: 223px;
-  height: 66px;
+  width: 210px;
+  height: 58px;
   text-align: center;
   border-radius: 22px;
   border: 1px solid #ccc;
-  font-size: 33px;
+  font-size: 29px;
   vertical-align: center;
   transition: all 0.2s ease-out;
 }
 
 .small-btn {
-  width: 180px;
-  height: 50px;
-  font-size: 28px;
+  width: 130px;
+  height: 45px;
+  font-size: 22px;
   position: absolute;
   right: 0;
   bottom: 0;
@@ -209,8 +200,8 @@ input.apple-switch:checked:after {
 
 .btn img {
   display: inline;
-  width: 43px;
-  height: 43px;
+  width: 33px;
+  height: 33px;
   vertical-align: middle;
 }
 
@@ -245,6 +236,11 @@ input.apple-switch:checked:after {
 
 .color-picker {
   grid-area: color-picker;
+  margin: 0;
+}
+
+.chrome-body {
+  margin: 0;
 }
 
 .saved-colors {
@@ -292,7 +288,7 @@ input.apple-switch:checked:after {
   height: 45px;
   background: #FFFFFF;
   border: 1px solid #BDE7D0;
-  box-shadow: inset 0px 0px 9px -3px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0 9px -3px rgba(0, 0, 0, 0.25);
   border-radius: 10px;
   text-align: center;
   margin-left: auto;
@@ -347,4 +343,8 @@ input::-webkit-inner-spin-button {
 
 .back {
   filter: brightness(60%);
+}
+
+.ng-invalid {
+  border-color: #FFB3B3;
 }

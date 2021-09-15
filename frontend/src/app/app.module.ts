@@ -12,6 +12,7 @@ import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {TokenInterceptor} from "./token.interceptor";
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatSliderModule} from "@angular/material/slider";
+import { ErrorComponent } from './error/error.component';
 
 
 
@@ -20,7 +21,8 @@ import {MatSliderModule} from "@angular/material/slider";
     AppComponent,
     NavbarComponent,
     ReductionAreaComponent,
-    DragDirective
+    DragDirective,
+    ErrorComponent
   ],
   imports: [
     BrowserModule,
